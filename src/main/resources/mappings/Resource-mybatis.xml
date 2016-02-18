@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">  
+<!-- 务必配置正确namespace 就是所映射的接口类-->  
+<mapper namespace="com.jiangnan.es.authorization.resource.dao.ResourceDao">
+
+    <!-- 保存资源 -->
+    <insert id="save" parameterType="Resource">
+    	INSERT INTO RESOURCE (NAME, IDENTIFIER, DESCRIPTION, ICON, TYPE, URL, PID, SORT, DELETED) 
+    		VALUES (#{name}, #{identifier}, #{description}, #{icon}, #{type, typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler}, #{url}, #{pid}, #{sort}, #{deleted})
+    </insert>
+    
+    <!-- 根据ID获取资源 -->
+    <select id="get" parameterType="int" resultMap="resourceMap">
+    	SELECT ID, NAME, IDENTIFIER, DESCRIPTION, ICON, TYPE, URL, PID, SORT, DELETED FROM RESOURCE WHERE ID = #{param2}
+    </select>
+    
+    <!-- 更新资源 -->
+    <update id="update" parameterType="Resource">
+    	UPDATE RESOURCE 
+    		<set>
+    			<if test="name != null and name != ''">
+		    		NAME = #{name},
+		    	</if>
+		    	<if test="identifier != null and identifier != ''">
+		    		IDENTIFIER = #{identifier},
+		    	</if>
+		    	<if test="description != null and description != ''">
+		    		DESCRIPTION = #{description},
+		    	</if>
+		    	<if test="icon != null and icon != ''">
+		    		ICON = #{icon},
+		    	</if>
+		    	<!-- <if test="type != null"> -->
+		    		TYPE = #{type, typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler},
+		    	<!-- </if> -->
+		    	<if test="url != null and url != ''">
+		    		URL = #{url},
+		    	</if>
+		    	<if test="pid != null">
+		    		PID = #{pid},
+		    	</if>
+		    	<if test="sort != null">
+		    		SORT = #{sort},
+		    	</if>
+		    	<if test="deleted != null">
+		    		DELETED = #{deleted} 
+		    	</if>
+    		</set>
+    	WHERE ID = #{id}
+    </update>
+    
+    <!-- 根据用户名查询用户 -->
+    <!-- <select id="selectByUserName" parameterType="User" resultType="User">
+    	SELECT ID, USERNAME, PASSWORD, EMAIL, SALT, CREATETIME, LASTUPDATE, ADMIN, DELETED FROM SYS_USER WHERE USERNAME = #{userName}
+    </select> -->
+    
+    <!-- 资源列表 -->
+    <select id="list" resultMap="resourceMap">
+    	SELECT ID, NAME, IDENTIFIER, DESCRIPTION, ICON, TYPE, URL, PID, SORT, DELETED FROM RESOURCE 
+    	<where>
+    		<if test="name != null and name != ''">
+	    		NAME = #{name}
+	    	</if>
+	    	<if test="identifier != null and identifier != ''">
+	    		AND IDENTIFIER = #{identifier}
+	    	</if>
+	    	<!-- <if test="type != null">
+	    		AND TYPE = #{type, typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler}
+	    	</if> -->
+    	</where>
+    	ORDER BY SORT ASC
+    </select>
+    
+    <!-- 统计 -->
+    <select id="listCount" parameterType="Resource" resultType="long">
+    	SELECT COUNT(1) RESOURCE
+    </select>
+    
+    <!-- 删除 -->
+    <delete id="remove" parameterType="int">
+    	DELETE FROM RESOURCE WHERE ID = #{param2}
+    </delete>
+    
+    <!-- 结果映射器 -->
+	<resultMap id="resourceMap" type="Resource" >
+	    <id column="ID" property="id"/>
+		<result column="NAME" property="name"/>
+		<result column="IDENTIFIER" property="identifier"/>
+		<result column="DESCRIPTION" property="description"/>
+		<result column="ICON" property="icon"/>
+		<result column="TYPE" property="type" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+		<result column="URL" property="url"/>
+		<result column="PID" property="pid"/>
+		<result column="SORT" property="sort"/>
+		<result column="DELETED" property="deleted"/>
+	</resultMap>
+</mapper>   

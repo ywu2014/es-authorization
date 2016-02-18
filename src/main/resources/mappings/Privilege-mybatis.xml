@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.jiangnan.es.authorization.privilege.dao.PrivilegeDao">
+    <!--新增-->
+    <insert id="save" parameterType="Privilege">
+    	INSERT INTO PRIVILEGE (ID, RESOURCE_ID, OPERATION_ID, DESCRIPTION) VALUES (#{id}, #{resource.id}, #{operation.id}, #{description})
+    </insert>
+   
+    <!--根据ID获取-->
+    <select id="get" parameterType="int" resultMap="privilegeMap">
+    	SELECT ID, RESOURCE_ID, OPERATION_ID, DESCRIPTION FROM PRIVILEGE WHERE ID = #{param2}
+    </select>
+    
+    <!--更新-->
+    <update id="update" parameterType="Privilege">
+		UPDATE PRIVILEGE 
+        <set>
+            <if test="resource != null and resource.id != null">RESOURCE_ID = #{resource.id},</if>
+            <if test="operation != null and operation.id != null">OPERATION_ID = #{operation.id},</if>
+            <if test="description != null and description != ''">DESCRIPTION = #{description}</if>
+        </set>
+		 WHERE ID = #{id}
+    </update>
+    
+    <!--列表-->
+    <select id="list" resultMap="privilegeResourceOperationMap" parameterType="Privilege">
+    	SELECT PRIVILEGE.ID AS PID, RESOURCE.ID AS RID, RESOURCE.NAME, OPERATION.ID AS OID, OPERATION.DESCRIPTION AS OD, PRIVILEGE.DESCRIPTION AS PD FROM PRIVILEGE
+			LEFT JOIN RESOURCE ON PRIVILEGE.RESOURCE_ID = RESOURCE.ID
+			LEFT JOIN OPERATION ON PRIVILEGE.OPERATION_ID = OPERATION.ID 
+		<where>
+    		<if test="resource != null and resource.name != null and resource.name != ''">
+	    		RESOURCE.NAME LIKE CONCAT('%', '${resource.name}', '%')
+	    	</if>
+	    	<if test="operation != null and operation.id != null">
+	    		AND OPERATION.ID = #{operation.id}
+	    	</if>
+	    	<!-- <if test="type != null">
+	    		AND TYPE = #{type, typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler}
+	    	</if> -->
+    	</where>
+    </select>
+    
+    <!--删除-->
+    <delete id="remove" parameterType="int">
+    	DELETE FROM PRIVILEGE WHERE ID = #{param2}
+    </delete>
+   
+    <!--结果映射器-->
+    <resultMap id="privilegeMap" type="Privilege">
+        <id column="ID" property="id"/>
+        <result column="RESOURCE_ID" property="resource.id"/>
+        <result column="OPERATION_ID" property="operation.id"/>
+        <result column="DESCRIPTION" property="description"/>
+    </resultMap>
+    <resultMap id="privilegeResourceOperationMap" type="PrivilegeResourceOperation">
+        <id column="PID" property="id"/>
+        <result column="RID" property="resourceId"/>
+        <result column="NAME" property="resourceName"/>
+        <result column="OID" property="operationId"/>
+        <result column="OD" property="operation"/>
+        <result column="PD" property="description"/>
+    </resultMap>
+</mapper>

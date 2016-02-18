@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.jiangnan.es.authorization.user.dao.UserDao">
+	
+	<sql id="userColumns">ID, USER_NAME, PASSWORD, EMAIL, SALT, ICON, CREATE_TIME, LAST_VISIT_TIME, CURRENT_LOGIN_COUNT, STATE</sql>
+
+    <!--新增-->
+    <insert id="save" parameterType="User">
+    	INSERT INTO USER (ID, USER_NAME, PASSWORD, EMAIL, SALT, ICON, CREATE_TIME, LAST_VISIT_TIME, CURRENT_LOGIN_COUNT, STATE) 
+    		VALUES (#{id}, #{userName}, #{password}, #{email}, #{salt}, #{icon}, #{createTime}, #{lastVisitTime}, #{currentLoginCount}, #{state, typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler})
+    </insert>
+    
+    <!--根据ID获取-->
+    <select id="get" parameterType="int" resultMap="userMap">
+    	SELECT ID, USER_NAME, PASSWORD, EMAIL, SALT, ICON, CREATE_TIME, LAST_VISIT_TIME, CURRENT_LOGIN_COUNT, STATE 
+    		FROM USER WHERE ID = #{param2}
+    </select>
+    
+    <!--更新-->
+    <update id="update" parameterType="User">
+		UPDATE USER 
+        <set>
+            <if test="userName != null and userName != ''">USER_NAME = #{userName},</if>
+            <if test="password != null and password != ''">PASSWORD = #{password},</if>
+            <if test="email != null and email != ''">EMAIL = #{email},</if>
+            <if test="salt != null and salt != ''">SALT = #{salt},</if>
+            <if test="icon != null and icon != ''">ICON = #{icon},</if>
+            <if test="lastVisitTime != null">LAST_VISIT_TIME = #{lastVisitTime},</if>
+            <if test="currentLoginCount != null and currentLoginCount != ''">CURRENT_LOGIN_COUNT = #{currentLoginCount},</if>
+            <if test="state != null and state != ''">STATE = #{state, typeHandler = org.apache.ibatis.type.EnumOrdinalTypeHandler},</if>
+        </set>
+		 WHERE ID = #{id}
+    </update>
+    
+    <!--列表-->
+    <select id="list" resultMap="userMap">
+    	SELECT <include refid="userColumns"/> FROM USER 
+        <where>
+            <if test="id != null and id != ''">ID = #{id}</if>
+            <if test="userName != null and userName != ''">AND USER_NAME = #{userName}</if>
+            <if test="password != null and password != ''">AND PASSWORD = #{password}</if>
+            <if test="email != null and email != ''">AND EMAIL = #{email}</if>
+            <if test="salt != null and salt != ''">AND SALT = #{salt}</if>
+            <if test="icon != null and icon != ''">AND ICON = #{icon}</if>
+            <if test="currentLoginCount != null and currentLoginCount != ''">AND CURRENT_LOGIN_COUNT = #{currentLoginCount}</if>
+            <if test="startVisitTime != null">AND LAST_VISIT_TIME &gt;= #{startVisitTime}</if>
+            <if test="endVisitTime != null">AND LAST_VISIT_TIME &lt; #{endVisitTime}</if>
+        </where>
+    </select>
+    
+    <!-- 获取用户授予的角色id -->
+    <select id="getRoleIds" resultType="int">
+    	SELECT ROLE_ID FROM USER_ROLE WHERE USER_ID = #{id}
+    </select>
+    
+    <!-- 根据用户名查找用户 -->
+    <select id="findByUserName" resultMap="userMap">
+    	SELECT <include refid="userColumns"/> FROM USER WHERE USER_NAME = #{param1}
+    </select>
+    
+    <!-- 移除用户角色关联 -->
+    <delete id="removeUserRoles">
+    	DELETE FROM USER_ROLE WHERE USER_ID = #{id}
+    </delete>
+    
+    <!-- 移除用户角色关联 -->
+    <delete id="removeUserRole">
+    	DELETE FROM USER_ROLE WHERE USER_ID = #{param1} AND ROLE_ID = #{param2}
+    </delete>
+    
+    <!-- 添加用户角色关联 -->
+    <insert id="addUserRole" parameterType="java.util.Map">
+    	INSERT INTO USER_ROLE (USER_ID, ROLE_ID) VALUES (#{uid}, #{rid})
+    </insert>
+    
+    <!--删除-->
+    <delete id="remove" parameterType="int">
+    	DELETE FROM USER WHERE ID = #{param2}
+    </delete>
+    
+    <!--结果映射器-->
+    <resultMap id="userMap" type="User">
+        <id column="ID" property="id"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="EMAIL" property="email"/>
+        <result column="SALT" property="salt"/>
+        <result column="ICON" property="icon"/>
+        <result column="CREATE_TIME" property="createTime"/>
+        <result column="LAST_VISIT_TIME" property="lastVisitTime"/>
+        <result column="CURRENT_LOGIN_COUNT" property="currentLoginCount"/>
+        <result column="STATE" property="state" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+    </resultMap>
+</mapper>

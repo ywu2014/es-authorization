@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.jiangnan.es.authorization.role.dao.RoleDao">
+    <!--新增-->
+    <insert id="save" parameterType="Role">
+    	INSERT INTO ROLE (ID, NAME, CODE, DESCRIPTION, SORT) VALUES (#{id}, #{name}, #{code}, #{description}, #{sort})
+    </insert>
+    
+    <!--根据ID获取-->
+    <select id="get" parameterType="int" resultMap="roleMap">
+    	SELECT ID, NAME, CODE, DESCRIPTION, SORT FROM ROLE WHERE ID = #{param2}
+    </select>
+   
+    <!--更新-->
+    <update id="update" parameterType="Role">
+		UPDATE ROLE 
+        <set>
+            <if test="name != null and name != ''">NAME = #{name},</if>
+            <if test="code != null and code != ''">CODE = #{code},</if>
+            <if test="description != null and description != ''">DESCRIPTION = #{description},</if>
+            <if test="sort != null">SORT = #{sort},</if>
+        </set>
+		 WHERE ID = #{id}
+    </update>
+    
+    <!--列表-->
+    <select id="list" resultMap="roleMap">
+    	SELECT ID, NAME, CODE, DESCRIPTION, SORT FROM ROLE 
+        <where>
+            <if test="id != null and id != ''">ID = #{id}</if>
+            <if test="name != null and name != ''">
+            	NAME LIKE CONCAT('%', '${name}', '%')
+            </if>
+            <if test="code != null and code != ''">
+            	AND CODE = #{code}
+            </if>
+        </where>
+         ORDER BY SORT ASC
+    </select>
+    
+    <!-- 获取用户授予的角色id -->
+    <select id="getPrivilegeIds" resultType="int">
+    	SELECT PRIVILEGE_ID FROM ROLE_PRIVILEGE WHERE ROLE_ID = #{id}
+    </select>
+    
+    <!-- 统计角色权限 -->
+    <select id="countRolePrivilege" resultType="int">
+    	SELECT COUNT(1) FROM ROLE_PRIVILEGE WHERE ROLE_ID = #{param1} AND PRIVILEGE_ID = #{param2}
+    </select>
+    
+    <!-- 新增角色权限关联 -->
+    <insert id="addRolePrivilege">
+    	INSERT INTO ROLE_PRIVILEGE(ROLE_ID, PRIVILEGE_ID) VALUES (#{param1}, #{param2})
+    </insert>
+    
+    <!-- 删除角色权限关联 -->
+    <delete id="removeRolePrivilege">
+    	DELETE FROM ROLE_PRIVILEGE WHERE ROLE_ID = #{param1} AND PRIVILEGE_ID = #{param2}
+    </delete>
+    
+    <!--删除-->
+    <delete id="remove" parameterType="int">
+    	DELETE FROM ROLE WHERE ID = #{param2}
+    </delete>
+    
+    <!--结果映射器-->
+    <resultMap id="roleMap" type="Role">
+        <id column="ID" property="id"/>
+        <result column="NAME" property="name"/>
+        <result column="CODE" property="code"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="SORT" property="sort"/>
+    </resultMap>
+</mapper>
