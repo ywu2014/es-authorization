@@ -6,13 +6,17 @@
 package com.jiangnan.es.authorization.user.service.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
+import com.jiangnan.es.authorization.role.entity.Role;
+import com.jiangnan.es.authorization.role.service.RoleService;
 import com.jiangnan.es.authorization.user.dao.UserDao;
 import com.jiangnan.es.authorization.user.entity.User;
 import com.jiangnan.es.authorization.user.service.PasswordService;
@@ -21,6 +25,7 @@ import com.jiangnan.es.common.entity.query.Page;
 import com.jiangnan.es.common.repository.BaseRepository;
 import com.jiangnan.es.orm.mybatis.plugin.PageHelper;
 import com.jiangnan.es.orm.mybatis.service.MybatisBaseServiceSupport;
+import com.jiangnan.es.util.CollectionUtils;
 import com.jiangnan.es.util.StringUtils;
 
 /**
@@ -35,6 +40,8 @@ public class UserServiceImpl extends MybatisBaseServiceSupport<User> implements 
 	UserDao userDao;
 	@Resource
 	PasswordService passwordService;
+	@Resource
+	RoleService roleService;
 
 	@Override
 	public User save(User user) {
@@ -89,6 +96,21 @@ public class UserServiceImpl extends MybatisBaseServiceSupport<User> implements 
 			return userDao.findByUserName(userName.trim());
 		}
 		return null;
+	}
+
+	@Override
+	public Set<Role> getRoles(User user) {
+		Set<Role> roles = new HashSet<Role>();
+		//通过this调用,走的是本类的调用,不会通过代理,享受不到相应的服务
+		//List<Integer> roleIds = ((UserService)AopContext.currentProxy()).getRoleIds(user);
+		List<Integer> roleIds = this.getRoleIds(user);
+		if (!CollectionUtils.isEmpty(roleIds)) {
+			for (Integer roleId : roleIds) {
+				Role role = roleService.get(Role.class, roleId);
+				roles.add(role);
+			}
+		}
+		return roles;
 	}
 
 }

@@ -7,7 +7,9 @@ package com.jiangnan.es.authorization.user.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import com.jiangnan.es.authorization.role.entity.Role;
 import com.jiangnan.es.authorization.user.entity.User;
 import com.jiangnan.es.common.entity.query.Page;
 import com.jiangnan.es.orm.mybatis.service.MybatisBaseService;
@@ -25,6 +27,12 @@ public interface UserService extends MybatisBaseService<User> {
 	 * @return
 	 */
 	public List<Integer> getRoleIds(User user);
+	/**
+	 * 获取用户对应的角色
+	 * @param user
+	 * @return
+	 */
+	public Set<Role> getRoles(User user);
 	/**
 	 * 修改用户角色信息
 	 * @param user
